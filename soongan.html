@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>순간지도 — 좋았던 순간만 남겨요</title>
+<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F7F6F3;
+  --surface: #FFFFFF;
+  --text: #1C1C1A;
+  --muted: #9A9890;
+  --border: rgba(28,28,26,0.08);
+
+  --vibe-편안: #A8D5BA;
+  --vibe-편안-light: #EAF7EF;
+  --vibe-편안-dark: #2D7A52;
+
+  --vibe-행복: #FFD6A5;
+  --vibe-행복-light: #FFF5E6;
+  --vibe-행복-dark: #A05A00;
+
+  --vibe-설렘: #FFAFC5;
+  --vibe-설렘-light: #FFEEF3;
+  --vibe-설렘-dark: #8C2442;
+
+  --vibe-여유: #B5CCFF;
+  --vibe-여유-light: #EAF0FF;
+  --vibe-여유-dark: #1A3A8C;
+
+  --vibe-몰입: #CDB4DB;
+  --vibe-몰입-light: #F2EBF7;
+  --vibe-몰입-dark: #5A2D7A;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: 'Pretendard', -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  max-width: 430px;
+  margin: 0 auto;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* ── SCREENS ── */
+.screen {
+  display: none;
+  min-height: 100vh;
+  flex-direction: column;
+  animation: fadeIn 0.3s ease;
+}
+.screen.active { display: flex; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── HOME ── */
+#home {
+  background: var(--bg);
+  justify-content: space-between;
+  padding: 0 0 100px;
+}
+
+.home-top {
+  padding: 60px 28px 0;
+}
+
+.home-greeting {
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 400;
+  margin-bottom: 8px;
+  letter-spacing: 0.02em;
+}
+
+.home-title {
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.8px;
+  color: var(--text);
+}
+
+.home-title em {
+  font-style: normal;
+  opacity: 0.3;
+}
+
+.recent-vibes {
+  padding: 40px 28px 0;
+  flex: 1;
+}
+
+.recent-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+
+.vibe-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.feed-item {
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border: 1px solid var(--border);
+  animation: fadeIn 0.4s ease;
+}
+
+.feed-dot {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.feed-body { flex: 1; }
+.feed-vibe { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+.feed-place { font-size: 12px; color: var(--muted); }
+.feed-time { font-size: 11px; color: var(--muted); flex-shrink: 0; }
+
+.empty-feed {
+  text-align: center;
+  padding: 48px 0;
+  color: var(--muted);
+}
+.empty-feed-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.4; }
+.empty-feed-text { font-size: 14px; line-height: 1.6; }
+
+/* ── BIG BUTTON ── */
+.fab-wrap {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+}
+
+.fab {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--text);
+  border: none;
+  color: white;
+  font-size: 26px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s, background 0.2s;
+  box-shadow: 0 8px 24px rgba(28,28,26,0.2);
+}
+.fab:hover { transform: scale(1.06); }
+.fab:active { transform: scale(0.94); }
+
+/* ── RECORD SCREEN ── */
+#record {
+  background: var(--surface);
+  padding: 0;
+}
+
+.record-header {
+  padding: 56px 28px 32px;
+  border-bottom: 1px solid var(--border);
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 24px;
+  font-family: 'Pretendard', sans-serif;
+}
+
+.record-q {
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.6px;
+  line-height: 1.3;
+}
+
+.record-body { padding: 28px; flex: 1; }
+
+.vibe-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+.vibe-btn {
+  background: var(--bg);
+  border: 1.5px solid transparent;
+  border-radius: 20px;
+  padding: 18px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.18s;
+  font-family: 'Pretendard', sans-serif;
+}
+
+.vibe-btn:active { transform: scale(0.96); }
+
+.vibe-btn.selected {
+  border-color: currentColor;
+}
+
+.vibe-emoji { font-size: 28px; }
+.vibe-label { font-size: 13px; font-weight: 600; }
+
+/* location section */
+.location-section { margin-bottom: 28px; }
+.section-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.location-pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg);
+  border-radius: 14px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+}
+
+.loc-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #4CAF50;
+  flex-shrink: 0;
+  animation: blink 1.5s infinite;
+}
+@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+.loc-text { flex: 1; font-size: 14px; font-weight: 500; }
+.loc-sub { font-size: 12px; color: var(--muted); margin-top: 1px; }
+
+.loc-loading { color: var(--muted); font-size: 14px; }
+
+/* memo */
+.memo-input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px 16px;
+  font-family: 'Pretendard', sans-serif;
+  font-size: 14px;
+  color: var(--text);
+  outline: none;
+  resize: none;
+  min-height: 80px;
+  line-height: 1.6;
+  transition: border-color 0.15s;
+}
+.memo-input::placeholder { color: var(--muted); }
+.memo-input:focus { border-color: rgba(28,28,26,0.3); }
+
+/* save btn */
+.save-btn {
+  width: 100%;
+  background: var(--text);
+  color: white;
+  border: none;
+  border-radius: 16px;
+  padding: 16px;
+  font-family: 'Pretendard', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 20px;
+}
+.save-btn:hover { opacity: 0.85; }
+.save-btn:active { transform: scale(0.98); }
+.save-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── MAP SCREEN ── */
+#mapview {
+  position: relative;
+  overflow: hidden;
+}
+
+#map-container {
+  width: 100%;
+  height: 100vh;
+  background: #E8E8E0;
+  position: relative;
+}
+
+.map-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #E8EDE0 0%, #D8E8D0 50%, #E0E8D8 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* SVG map background */
+.map-svg { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0.4; }
+
+.map-pins-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+}
+
+.map-pin {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: translate(-50%, -100%);
+  cursor: pointer;
+  animation: pinDrop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes pinDrop {
+  from { transform: translate(-50%, -120%) scale(0); opacity: 0; }
+  to { transform: translate(-50%, -100%) scale(1); opacity: 1; }
+}
+
+.pin-circle {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  border: 3px solid white;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  transition: transform 0.2s;
+}
+.map-pin:hover .pin-circle { transform: scale(1.15); }
+
+.pin-tail {
+  width: 3px; height: 8px;
+  background: white;
+  border-radius: 0 0 2px 2px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* map overlay top */
+.map-top {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  padding: 52px 20px 16px;
+  z-index: 10;
+  background: linear-gradient(to bottom, rgba(247,246,243,0.95) 60%, transparent);
+}
+
+.map-top-title {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.5px;
+}
+
+.map-top-sub {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+/* bottom sheet */
+.map-sheet {
+  position: absolute;
+  bottom: 80px;
+  left: 16px; right: 16px;
+  background: var(--surface);
+  border-radius: 20px;
+  padding: 20px;
+  z-index: 10;
+  border: 1px solid var(--border);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.sheet-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.sheet-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sheet-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.sheet-dot {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.sheet-item-name { font-weight: 500; flex: 1; }
+.sheet-item-time { font-size: 11px; color: var(--muted); }
+
+.map-empty {
+  text-align: center;
+  padding: 20px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* ── PROFILE SCREEN ── */
+#profile {
+  background: var(--bg);
+  padding: 0 0 100px;
+}
+
+.profile-top {
+  background: var(--surface);
+  padding: 60px 28px 28px;
+  border-bottom: 1px solid var(--border);
+}
+
+.profile-avatar {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  background: var(--text);
+  color: white;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.profile-name { font-size: 22px; font-weight: 600; letter-spacing: -0.5px; }
+.profile-sub { font-size: 14px; color: var(--muted); margin-top: 4px; }
+
+.stats-row {
+  display: flex;
+  gap: 24px;
+  margin-top: 20px;
+}
+
+.stat { text-align: center; }
+.stat-num { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+.stat-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+.insight-section { padding: 24px 28px 0; }
+
+.insight-card {
+  background: var(--surface);
+  border-radius: 20px;
+  padding: 22px;
+  border: 1px solid var(--border);
+  margin-bottom: 12px;
+}
+
+.insight-tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  margin-bottom: 10px;
+  letter-spacing: 0.05em;
+}
+
+.insight-text {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: -0.3px;
+}
+
+.vibe-bars { margin-top: 20px; display: flex; flex-direction: column; gap: 10px; }
+
+.vibe-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.vibe-bar-icon { font-size: 16px; width: 24px; text-align: center; }
+.vibe-bar-name { font-size: 12px; color: var(--muted); width: 32px; }
+
+.vibe-bar-track {
+  flex: 1; height: 6px;
+  background: var(--bg);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.vibe-bar-fill { height: 100%; border-radius: 3px; transition: width 1s ease; }
+.vibe-bar-pct { font-size: 11px; color: var(--muted); width: 28px; text-align: right; }
+
+/* ── BOTTOM NAV ── */
+.bottom-nav {
+  position: fixed;
+  bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 430px;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid var(--border);
+  display: flex;
+  padding: 10px 0 20px;
+  z-index: 100;
+}
+
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  cursor: pointer;
+  padding: 4px 0;
+  transition: opacity 0.15s;
+}
+
+.nav-icon { font-size: 22px; }
+.nav-label { font-size: 10px; color: var(--muted); font-weight: 500; }
+.nav-item.active .nav-label { color: var(--text); font-weight: 700; }
+
+/* ── SUCCESS ANIM ── */
+.success-overlay {
+  position: fixed; inset: 0;
+  background: rgba(247,246,243,0.95);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  z-index: 999;
+  animation: fadeIn 0.2s ease;
+}
+
+.success-circle {
+  width: 100px; height: 100px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 48px;
+  margin-bottom: 20px;
+  animation: pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes pop {
+  from { transform: scale(0); }
+  to { transform: scale(1); }
+}
+
+.success-text { font-size: 20px; font-weight: 600; letter-spacing: -0.5px; }
+.success-sub { font-size: 14px; color: var(--muted); margin-top: 6px; }
+
+/* ── NOTIF ── */
+.notif {
+  position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
+  background: var(--text); color: white;
+  padding: 10px 20px; border-radius: 100px;
+  font-size: 13px; font-weight: 500;
+  z-index: 999; white-space: nowrap;
+  animation: notifIn 0.25s ease;
+}
+@keyframes notifIn { from { opacity:0; transform: translateX(-50%) translateY(10px); } to { opacity:1; transform: translateX(-50%) translateY(0); } }
+</style>
+</head>
+<body>
+
+<!-- ══ HOME ══ -->
+<div class="screen active" id="home">
+  <div class="home-top">
+    <div class="home-greeting" id="greeting">오늘도 좋은 순간이 있었나요?</div>
+    <div class="home-title">좋았던 순간만<br><em>모아요</em> ✦</div>
+  </div>
+
+  <div class="recent-vibes">
+    <div class="recent-label">최근 기록</div>
+    <div class="vibe-feed" id="vibeFeed">
+      <div class="empty-feed">
+        <div class="empty-feed-icon">🗺️</div>
+        <div class="empty-feed-text">아직 기록이 없어요<br>아래 + 버튼으로 첫 순간을 남겨봐요</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ RECORD ══ -->
+<div class="screen" id="record">
+  <div class="record-header">
+    <button class="back-btn" onclick="goScreen('home')">← 돌아가기</button>
+    <div class="record-q">지금 어떤 느낌이었어요?</div>
+  </div>
+
+  <div class="record-body" style="overflow-y:auto; padding-bottom:120px;">
+    <div class="vibe-grid" id="vibeGrid">
+      <button class="vibe-btn" data-vibe="편안" onclick="selectVibe(this)"
+        style="--c:var(--vibe-편안); --cl:var(--vibe-편안-light); --cd:var(--vibe-편안-dark);">
+        <span class="vibe-emoji">🌿</span>
+        <span class="vibe-label" style="color:var(--vibe-편안-dark);">편안</span>
+      </button>
+      <button class="vibe-btn" data-vibe="행복" onclick="selectVibe(this)"
+        style="--c:var(--vibe-행복); --cl:var(--vibe-행복-light); --cd:var(--vibe-행복-dark);">
+        <span class="vibe-emoji">☀️</span>
+        <span class="vibe-label" style="color:var(--vibe-행복-dark);">행복</span>
+      </button>
+      <button class="vibe-btn" data-vibe="설렘" onclick="selectVibe(this)"
+        style="--c:var(--vibe-설렘); --cl:var(--vibe-설렘-light); --cd:var(--vibe-설렘-dark);">
+        <span class="vibe-emoji">💛</span>
+        <span class="vibe-label" style="color:var(--vibe-설렘-dark);">설렘</span>
+      </button>
+      <button class="vibe-btn" data-vibe="여유" onclick="selectVibe(this)"
+        style="--c:var(--vibe-여유); --cl:var(--vibe-여유-light); --cd:var(--vibe-여유-dark);">
+        <span class="vibe-emoji">☕</span>
+        <span class="vibe-label" style="color:var(--vibe-여유-dark);">여유</span>
+      </button>
+      <button class="vibe-btn" data-vibe="몰입" onclick="selectVibe(this)"
+        style="--c:var(--vibe-몰입); --cl:var(--vibe-몰입-light); --cd:var(--vibe-몰입-dark);">
+        <span class="vibe-emoji">🎶</span>
+        <span class="vibe-label" style="color:var(--vibe-몰입-dark);">몰입</span>
+      </button>
+    </div>
+
+    <div class="location-section">
+      <div class="section-label">위치</div>
+      <div class="location-pill" id="locationPill">
+        <div class="loc-dot"></div>
+        <div>
+          <div class="loc-text loc-loading">위치 가져오는 중...</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="location-section">
+      <div class="section-label">메모 (선택)</div>
+      <textarea class="memo-input" id="memoInput" placeholder="어떤 순간이었는지 짧게 남겨요..."></textarea>
+    </div>
+
+    <button class="save-btn" id="saveBtn" onclick="saveVibe()" disabled>기록하기</button>
+  </div>
+</div>
+
+<!-- ══ MAP ══ -->
+<div class="screen" id="mapview">
+  <div id="map-container">
+    <div class="map-placeholder" id="mapPlaceholder">
+      <svg class="map-svg" viewBox="0 0 430 800" xmlns="http://www.w3.org/2000/svg">
+        <rect x="0" y="100" width="430" height="600" rx="0" fill="#D4E8C8" opacity="0.5"/>
+        <path d="M0 200 Q80 180 160 220 Q240 260 320 200 Q380 160 430 190 L430 400 Q360 380 280 420 Q200 460 120 400 Q60 360 0 380 Z" fill="#C8DDB8" opacity="0.6"/>
+        <path d="M60 350 Q120 330 180 360 Q240 390 300 350 L300 500 Q240 520 180 490 Q120 460 60 480 Z" fill="#BCD0A8" opacity="0.5"/>
+        <rect x="140" y="280" width="80" height="40" rx="4" fill="#E8E0D0" opacity="0.6"/>
+        <rect x="240" y="300" width="60" height="50" rx="4" fill="#E8E0D0" opacity="0.5"/>
+        <rect x="80" y="320" width="50" height="35" rx="4" fill="#E8E0D0" opacity="0.4"/>
+        <path d="M0 500 Q100 480 200 500 Q300 520 430 500 L430 800 L0 800 Z" fill="#C0D8B8" opacity="0.4"/>
+        <line x1="0" y1="250" x2="430" y2="230" stroke="#D0C8B8" stroke-width="12" opacity="0.5"/>
+        <line x1="100" y1="0" x2="120" y2="800" stroke="#D0C8B8" stroke-width="8" opacity="0.4"/>
+        <line x1="280" y1="0" x2="260" y2="800" stroke="#D0C8B8" stroke-width="6" opacity="0.3"/>
+      </svg>
+      <div class="map-pins-layer" id="mapPins"></div>
+    </div>
+  </div>
+
+  <div class="map-top">
+    <div class="map-top-title">내 행복 지도</div>
+    <div class="map-top-sub" id="mapSubtitle">기록이 쌓이면 지도가 채워져요</div>
+  </div>
+
+  <div class="map-sheet">
+    <div class="sheet-label">최근 순간들</div>
+    <div class="sheet-items" id="sheetItems">
+      <div class="map-empty">아직 기록이 없어요 ✦</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PROFILE ══ -->
+<div class="screen" id="profile">
+  <div class="profile-top">
+    <div class="profile-avatar">나</div>
+    <div class="profile-name">나의 바이브</div>
+    <div class="profile-sub" id="profileSub">기록을 시작해보세요</div>
+    <div class="stats-row">
+      <div class="stat">
+        <div class="stat-num" id="statTotal">0</div>
+        <div class="stat-label">총 기록</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" id="statPlaces">0</div>
+        <div class="stat-label">장소</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" id="statDays">0</div>
+        <div class="stat-label">기록한 날</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="insight-section">
+    <div class="insight-card" id="insightCard">
+      <div class="insight-tag" style="background:#EAF7EF;color:#2D7A52;">✦ 인사이트</div>
+      <div class="insight-text" id="insightText">기록이 쌓이면<br>나만의 패턴을 발견해요</div>
+    </div>
+
+    <div class="card" style="background:white;border-radius:20px;padding:22px;border:1px solid var(--border);">
+      <div class="section-label" style="margin-bottom:16px;">바이브 분포</div>
+      <div class="vibe-bars" id="vibeBars"></div>
+    </div>
+  </div>
+</div>
+
+<!-- FAB -->
+<div class="fab-wrap" id="fabWrap">
+  <button class="fab" onclick="goScreen('record')">+</button>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <div class="nav-item active" id="nav-home" onclick="goScreen('home')">
+    <span class="nav-icon">✦</span>
+    <span class="nav-label">홈</span>
+  </div>
+  <div class="nav-item" id="nav-mapview" onclick="goScreen('mapview')">
+    <span class="nav-icon">◎</span>
+    <span class="nav-label">지도</span>
+  </div>
+  <div class="nav-item" id="nav-profile" onclick="goScreen('profile')">
+    <span class="nav-icon">◐</span>
+    <span class="nav-label">나</span>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDgWRwoijrRsDZZl-FQDgyt73h7vrx43x4",
+  authDomain: "t-rip-gether.firebaseapp.com",
+  projectId: "t-rip-gether",
+  storageBucket: "t-rip-gether.firebasestorage.app",
+  messagingSenderId: "586897106273",
+  appId: "1:586897106273:web:3bdc75217fcefccace9120"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// ── VIBE CONFIG ──────────────────────────────
+const VIBES = {
+  편안: { emoji: '🌿', color: '#A8D5BA', light: '#EAF7EF', dark: '#2D7A52' },
+  행복: { emoji: '☀️', color: '#FFD6A5', light: '#FFF5E6', dark: '#A05A00' },
+  설렘: { emoji: '💛', color: '#FFAFC5', light: '#FFEEF3', dark: '#8C2442' },
+  여유: { emoji: '☕', color: '#B5CCFF', light: '#EAF0FF', dark: '#1A3A8C' },
+  몰입: { emoji: '🎶', color: '#CDB4DB', light: '#F2EBF7', dark: '#5A2D7A' },
+};
+
+// ── STATE ────────────────────────────────────
+let currentVibe = null;
+let currentLocation = null;
+let vibes = [];
+
+// ── SCREEN NAV ───────────────────────────────
+window.goScreen = function(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('nav-'+id)?.classList.add('active');
+
+  const fab = document.getElementById('fabWrap');
+  fab.style.display = (id === 'record') ? 'none' : 'flex';
+
+  if(id === 'record') startRecord();
+  if(id === 'mapview') renderMap();
+  if(id === 'profile') renderProfile();
+};
+
+// ── GREETING ─────────────────────────────────
+function setGreeting() {
+  const h = new Date().getHours();
+  const greetings = {
+    morning: '좋은 아침이에요 ☀️',
+    afternoon: '오늘 오후는 어때요?',
+    evening: '저녁은 어땠나요? 🌙',
+    night: '오늘 하루 어떠셨어요? ✦',
+  };
+  const g = h < 12 ? greetings.morning : h < 17 ? greetings.afternoon : h < 21 ? greetings.evening : greetings.night;
+  document.getElementById('greeting').textContent = g;
+}
+
+// ── RECORD ───────────────────────────────────
+function startRecord() {
+  currentVibe = null;
+  currentLocation = null;
+  document.getElementById('memoInput').value = '';
+  document.getElementById('saveBtn').disabled = true;
+  document.querySelectorAll('.vibe-btn').forEach(b => {
+    b.classList.remove('selected');
+    b.style.background = '';
+    b.style.borderColor = '';
+  });
+
+  const pill = document.getElementById('locationPill');
+  pill.innerHTML = `<div class="loc-dot"></div><div><div class="loc-text loc-loading">위치 가져오는 중...</div></div>`;
+
+  if(navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+      const { latitude: lat, longitude: lng } = pos.coords;
+      currentLocation = { lat, lng };
+
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=ko`);
+        const data = await res.json();
+        const addr = data.address;
+        const place = addr.amenity || addr.shop || addr.cafe || addr.building || addr.road || '이 근처';
+        const area = addr.suburb || addr.neighbourhood || addr.quarter || addr.city_district || addr.city || '';
+        currentLocation.name = place;
+        currentLocation.area = area;
+        pill.innerHTML = `
+          <div class="loc-dot"></div>
+          <div>
+            <div class="loc-text">${place}</div>
+            <div class="loc-sub">${area}</div>
+          </div>`;
+      } catch {
+        currentLocation.name = '현재 위치';
+        currentLocation.area = `${lat.toFixed(3)}, ${lng.toFixed(3)}`;
+        pill.innerHTML = `<div class="loc-dot"></div><div><div class="loc-text">현재 위치</div></div>`;
+      }
+      checkSaveReady();
+    }, () => {
+      currentLocation = { lat: 37.5, lng: 127.0, name: '위치 없음', area: '' };
+      pill.innerHTML = `<div style="font-size:18px;">📍</div><div><div class="loc-text">위치를 가져올 수 없어요</div></div>`;
+      checkSaveReady();
+    });
+  }
+}
+
+window.selectVibe = function(btn) {
+  document.querySelectorAll('.vibe-btn').forEach(b => {
+    b.classList.remove('selected');
+    b.style.background = '';
+    b.style.borderColor = '';
+  });
+  const vibe = btn.dataset.vibe;
+  const cfg = VIBES[vibe];
+  btn.classList.add('selected');
+  btn.style.background = cfg.light;
+  btn.style.borderColor = cfg.color;
+  currentVibe = vibe;
+  checkSaveReady();
+};
+
+function checkSaveReady() {
+  document.getElementById('saveBtn').disabled = !(currentVibe && currentLocation);
+}
+
+window.saveVibe = async function() {
+  if(!currentVibe || !currentLocation) return;
+  const memo = document.getElementById('memoInput').value.trim();
+  const cfg = VIBES[currentVibe];
+
+  try {
+    await addDoc(collection(db, 'vibes'), {
+      vibe: currentVibe,
+      emoji: cfg.emoji,
+      color: cfg.color,
+      lat: currentLocation.lat,
+      lng: currentLocation.lng,
+      place: currentLocation.name,
+      area: currentLocation.area,
+      memo,
+      createdAt: serverTimestamp(),
+    });
+
+    showSuccess(currentVibe, cfg.emoji, currentLocation.name);
+  } catch(e) {
+    showNotif('⚠ 저장 실패: ' + e.message);
+  }
+};
+
+function showSuccess(vibe, emoji, place) {
+  const cfg = VIBES[vibe];
+  const el = document.createElement('div');
+  el.className = 'success-overlay';
+  el.innerHTML = `
+    <div class="success-circle" style="background:${cfg.light};">${emoji}</div>
+    <div class="success-text">${vibe}한 순간이 기록됐어요</div>
+    <div class="success-sub">${place}</div>
+  `;
+  document.body.appendChild(el);
+  setTimeout(() => {
+    el.remove();
+    goScreen('home');
+  }, 1800);
+}
+
+// ── FEED ─────────────────────────────────────
+function renderFeed() {
+  const feed = document.getElementById('vibeFeed');
+  if(!vibes.length) {
+    feed.innerHTML = `<div class="empty-feed"><div class="empty-feed-icon">🗺️</div><div class="empty-feed-text">아직 기록이 없어요<br>아래 + 버튼으로 첫 순간을 남겨봐요</div></div>`;
+    return;
+  }
+  feed.innerHTML = vibes.slice(0, 10).map(v => {
+    const cfg = VIBES[v.vibe] || { color: '#ccc', emoji: '✦' };
+    const time = v.createdAt ? timeAgo(v.createdAt.toMillis()) : '방금';
+    return `<div class="feed-item">
+      <div class="feed-dot" style="background:${cfg.color};">${cfg.emoji}</div>
+      <div class="feed-body">
+        <div class="feed-vibe">${v.vibe}</div>
+        <div class="feed-place">${v.place || ''}${v.area ? ' · '+v.area : ''}</div>
+      </div>
+      <div class="feed-time">${time}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── MAP ──────────────────────────────────────
+function renderMap() {
+  const subtitle = document.getElementById('mapSubtitle');
+  const pins = document.getElementById('mapPins');
+  const sheet = document.getElementById('sheetItems');
+
+  if(!vibes.length) {
+    pins.innerHTML = '';
+    sheet.innerHTML = '<div class="map-empty">아직 기록이 없어요 ✦</div>';
+    subtitle.textContent = '기록이 쌓이면 지도가 채워져요';
+    return;
+  }
+
+  subtitle.textContent = `${vibes.length}개의 좋았던 순간`;
+
+  // scatter pins across map placeholder
+  const container = document.getElementById('mapPlaceholder');
+  const w = container.offsetWidth || 430;
+  const h = container.offsetHeight || 800;
+
+  pins.innerHTML = vibes.slice(0, 20).map((v, i) => {
+    const cfg = VIBES[v.vibe] || { color: '#ccc', emoji: '✦' };
+    // distribute pins across map area
+    const x = 60 + (i * 73 + 40) % (w - 120);
+    const y = 160 + (i * 97 + 60) % (h - 280);
+    return `<div class="map-pin" style="left:${x}px;top:${y}px;" title="${v.vibe} @ ${v.place}">
+      <div class="pin-circle" style="background:${cfg.color};">${cfg.emoji}</div>
+      <div class="pin-tail"></div>
+    </div>`;
+  }).join('');
+
+  sheet.innerHTML = vibes.slice(0, 5).map(v => {
+    const cfg = VIBES[v.vibe] || { color: '#ccc', emoji: '✦' };
+    const time = v.createdAt ? timeAgo(v.createdAt.toMillis()) : '방금';
+    return `<div class="sheet-item">
+      <div class="sheet-dot" style="background:${cfg.color};">${cfg.emoji}</div>
+      <span class="sheet-item-name">${v.vibe} · ${v.place || ''}</span>
+      <span class="sheet-item-time">${time}</span>
+    </div>`;
+  }).join('');
+}
+
+// ── PROFILE ──────────────────────────────────
+function renderProfile() {
+  document.getElementById('statTotal').textContent = vibes.length;
+
+  const places = new Set(vibes.map(v => v.place)).size;
+  document.getElementById('statPlaces').textContent = places;
+
+  const days = new Set(vibes.filter(v => v.createdAt).map(v => new Date(v.createdAt.toMillis()).toDateString())).size;
+  document.getElementById('statDays').textContent = days;
+
+  // insight
+  const counts = {};
+  vibes.forEach(v => counts[v.vibe] = (counts[v.vibe]||0)+1);
+  const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+  const insightText = document.getElementById('insightText');
+
+  if(sorted.length) {
+    const top = sorted[0];
+    const cfg = VIBES[top[0]];
+    insightText.innerHTML = `${cfg?.emoji || ''} <strong>${top[0]}</strong>할 때<br>가장 좋은 시간을 보내요`;
+    document.getElementById('profileSub').textContent = `${vibes.length}개의 좋은 순간을 모았어요`;
+  }
+
+  // bars
+  const bars = document.getElementById('vibeBars');
+  if(!sorted.length) {
+    bars.innerHTML = '<div style="font-size:13px;color:var(--muted);">기록이 쌓이면 보여요</div>';
+    return;
+  }
+  const max = sorted[0][1];
+  bars.innerHTML = sorted.map(([vibe, cnt]) => {
+    const cfg = VIBES[vibe] || { color: '#ccc', emoji: '✦' };
+    const pct = Math.round(cnt/vibes.length*100);
+    return `<div class="vibe-bar-row">
+      <span class="vibe-bar-icon">${cfg.emoji}</span>
+      <span class="vibe-bar-name">${vibe}</span>
+      <div class="vibe-bar-track">
+        <div class="vibe-bar-fill" style="width:${pct}%;background:${cfg.color};"></div>
+      </div>
+      <span class="vibe-bar-pct">${pct}%</span>
+    </div>`;
+  }).join('');
+}
+
+// ── REALTIME ─────────────────────────────────
+const q = query(collection(db, 'vibes'), orderBy('createdAt', 'desc'));
+onSnapshot(q, snap => {
+  vibes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  renderFeed();
+}, err => console.error(err));
+
+// ── UTILS ────────────────────────────────────
+function timeAgo(ms) {
+  const sec = Math.floor((Date.now() - ms) / 1000);
+  if(sec < 60) return '방금';
+  if(sec < 3600) return Math.floor(sec/60)+'분 전';
+  if(sec < 86400) return Math.floor(sec/3600)+'시간 전';
+  return Math.floor(sec/86400)+'일 전';
+}
+
+window.showNotif = function(msg) {
+  document.querySelector('.notif')?.remove();
+  const n = document.createElement('div');
+  n.className = 'notif';
+  n.textContent = msg;
+  document.body.appendChild(n);
+  setTimeout(() => n.remove(), 2500);
+};
+
+// ── INIT ─────────────────────────────────────
+setGreeting();
+</script>
+</body>
+</html>
