@@ -648,10 +648,11 @@ body {
 
     <div class="location-section">
       <div class="section-label">위치</div>
-      <div class="location-pill" id="locationPill">
-        <div class="loc-dot"></div>
+      <div class="location-pill" id="locationPill" onclick="requestLocationManual()" style="cursor:pointer;">
+        <div style="font-size:18px;">📍</div>
         <div>
-          <div class="loc-text loc-loading">위치 가져오는 중...</div>
+          <div class="loc-text" style="color:var(--accent,#4CAF7D);font-weight:600;">탭해서 위치 가져오기</div>
+          <div class="loc-sub">현재 위치를 자동으로 인식해요</div>
         </div>
       </div>
     </div>
@@ -839,6 +840,7 @@ function startRecord() {
   currentVibe = null;
   currentEnergyType = 'charge';
   selectedPhoto = null;
+  currentLocation = null;
   document.getElementById('memoInput').value = '';
   document.getElementById('saveBtn').disabled = true;
   document.getElementById('photoInput').value = '';
@@ -849,9 +851,70 @@ function startRecord() {
   document.getElementById('tabCharge').classList.add('active');
   document.getElementById('tabDrain').classList.remove('active');
   renderVibeGrid('charge');
-  updateLocationPill();
+  resetLocationPill();
   checkSaveReady();
 }
+
+function resetLocationPill() {
+  const pill = document.getElementById('locationPill');
+  pill.onclick = requestLocationManual;
+  pill.style.cursor = 'pointer';
+  pill.innerHTML = `
+    <div style="font-size:18px;">📍</div>
+    <div>
+      <div class="loc-text" style="color:#4CAF7D;font-weight:600;">탭해서 위치 가져오기</div>
+      <div class="loc-sub">현재 위치를 자동으로 인식해요</div>
+    </div>`;
+}
+
+window.requestLocationManual = function() {
+  const pill = document.getElementById('locationPill');
+  pill.onclick = null;
+  pill.style.cursor = 'default';
+  pill.innerHTML = `<div class="loc-dot"></div><div><div class="loc-text loc-loading">위치 가져오는 중...</div></div>`;
+
+  if(!navigator.geolocation) {
+    pill.innerHTML = `<div style="font-size:18px;">⚠️</div><div><div class="loc-text">위치를 지원하지 않는 브라우저예요</div></div>`;
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(async (pos) => {
+    const { latitude: lat, longitude: lng } = pos.coords;
+    currentLocation = { lat, lng };
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=ko`);
+      const data = await res.json();
+      const addr = data.address;
+      const place = addr.amenity || addr.shop || addr.cafe || addr.building || addr.road || '이 근처';
+      const area = addr.suburb || addr.neighbourhood || addr.quarter || addr.city_district || addr.city || '';
+      currentLocation.name = place;
+      currentLocation.area = area;
+      pill.innerHTML = `
+        <div class="loc-dot"></div>
+        <div>
+          <div class="loc-text">${place}</div>
+          ${area ? `<div class="loc-sub">${area}</div>` : ''}
+        </div>`;
+    } catch {
+      currentLocation.name = '현재 위치';
+      currentLocation.area = '';
+      pill.innerHTML = `<div class="loc-dot"></div><div><div class="loc-text">현재 위치</div></div>`;
+    }
+    checkSaveReady();
+  }, (err) => {
+    pill.onclick = requestLocationManual;
+    pill.style.cursor = 'pointer';
+    pill.innerHTML = `
+      <div style="font-size:18px;">⚠️</div>
+      <div>
+        <div class="loc-text" style="color:#E07060;">위치 권한이 필요해요</div>
+        <div class="loc-sub">탭해서 다시 시도</div>
+      </div>`;
+    // 위치 없어도 기록 가능하게
+    currentLocation = { lat: 0, lng: 0, name: '위치 없음', area: '' };
+    checkSaveReady();
+  }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+};
 
 window.switchEnergyTab = function(type) {
   currentEnergyType = type;
@@ -1344,7 +1407,8 @@ function updateLocationPill() {
 
 // ── INIT ─────────────────────────────────────
 setGreeting();
-requestLocation(); // 앱 시작하자마자 위치 요청!
+// 지도용 기본 위치 (서울) - 실제 위치는 기록 화면에서 탭해서 요청
+initLeafletMap(37.5665, 126.9780);
 </script>
 </body>
 </html>
